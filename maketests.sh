@@ -1,10 +1,4 @@
-if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make generator
-then
-    echo Need make-able generator.
-    exit 1
-fi
-
-if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make solution
+if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make -s solution
 then
     echo Need make-able solution.
     exit 1
@@ -14,6 +8,8 @@ if test -f subtasks.csv
 then
     rowid=0
     testid=1
+
+    export generator=generator
 
     while IFS=',' read -ra row
     do
@@ -41,7 +37,13 @@ then
                 do
                     echo Making test $testid
 
-                    if ! testid=$testid intaskid=$i ./generator > test"$testid".in
+                    if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make -s $generator
+                    then
+                        echo Need make-able generator.
+                        exit 1
+                    fi
+
+                    if ! testid=$testid intaskid=$i ./$generator > test"$testid".in
                     then
                         echo 'Test generator failed.'
                         exit 1

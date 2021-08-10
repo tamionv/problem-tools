@@ -47,3 +47,9 @@ int main(){
 * The `maketests.sh` script.
 * A minimal example (`generator.cpp`, `solution.cpp`, `subtasks.csv`), generating tests for a problem where we are asked to sum two integers.
 * The README and LICENSE
+
+# Changes
+
+## Version 1.1
+
+* Added in capability for multiple generators, given by a column `generator` in the configuration. By default the generator is just `generator`. These are generated using `make`.
