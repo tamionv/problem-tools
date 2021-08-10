@@ -53,3 +53,7 @@ int main(){
 ## Version 1.1
 
 * Added in capability for multiple generators, given by a column `generator` in the configuration. By default the generator is just `generator`. These are generated using `make`.
+
+## Version 1.2
+
+* Added in "implicit carry-over" for parameters. Thus leaving a table cell blank will just "carry-over" the old value. The implicit values for the `#` and `generator` columns are `1` and `generator` respectively.

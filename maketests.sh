@@ -10,6 +10,7 @@ then
     testid=1
 
     export generator=generator
+    cnt=1
 
     while IFS=',' read -ra row
     do
@@ -17,49 +18,45 @@ then
         then
             headers=("${row[@]}")
         else
-            unset cnt
-
             export taskid=$rowid
 
             for i in "${!headers[@]}"
             do
-                if [ "${headers[$i]}" == '#' ]
+                t=${row[$i]//[[:space:]]/}
+                if ! [ -z "$t" ]
                 then
-                    cnt="${row[$i]}"
-                else
-                    export "${headers[$i]}=${row[$i]}"
+                    if [ "${headers[$i]}" == '#' ]
+                    then
+                        cnt=${row[$i]}
+                    else
+                        export "${headers[$i]}=$t"
+                    fi
                 fi
             done
 
-            if [ -v cnt ]
-            then
-                for i in $(seq 1 $cnt)
-                do
-                    echo Making test $testid
+            for i in $(seq 1 $cnt)
+            do
+                echo Making test $testid
 
-                    if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make -s $generator
-                    then
-                        echo Need make-able generator.
-                        exit 1
-                    fi
+                if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make -s $generator
+                then
+                    echo Need make-able generator.
+                    exit 1
+                fi
 
-                    if ! testid=$testid intaskid=$i ./$generator > test"$testid".in
-                    then
-                        echo 'Test generator failed.'
-                        exit 1
-                    fi
+                if ! testid=$testid intaskid=$i ./$generator > test"$testid".in
+                then
+                    echo 'Test generator failed.'
+                    exit 1
+                fi
 
-                    if ! testid=$testid intaskid=$i ./solution < test"$testid".in > test"$testid".ok
-                    then
-                        echo 'Solution failed.'
-                    fi
+                if ! testid=$testid intaskid=$i ./solution < test"$testid".in > test"$testid".ok
+                then
+                    echo 'Solution failed.'
+                fi
 
-                    testid=$((testid+1))
-                done
-            else
-                echo 'subtasks.csv needs # column for number of tests per subtask'
-                exit 1
-            fi
+                testid=$((testid+1))
+            done
         fi
         rowid=$((rowid+1))
     done < subtasks.csv
