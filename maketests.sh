@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make -s solution
 then
     echo Need make-able solution.
@@ -23,7 +25,7 @@ then
             for i in "${!headers[@]}"
             do
                 t=${row[$i]//[[:space:]]/}
-                if ! [ -z "$t" ]
+                if [ -n "$t" ]
                 then
                     if [ "${headers[$i]}" == '#' ]
                     then
@@ -34,7 +36,7 @@ then
                 fi
             done
 
-            for i in $(seq 1 $cnt)
+            for i in $(seq 1 "$cnt")
             do
                 echo Making test $testid
 

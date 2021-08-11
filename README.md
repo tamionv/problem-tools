@@ -57,3 +57,7 @@ int main(){
 ## Version 1.2
 
 * Added in "implicit carry-over" for parameters. Thus leaving a table cell blank will just "carry-over" the old value. The implicit values for the `#` and `generator` columns are `1` and `generator` respectively.
+
+## Version 1.3
+
+* Added in githook for linting with shellcheck, and made relevant repairs.
