@@ -45,7 +45,7 @@ EOF
 	exit 1
 fi
 
-if ! shellcheck ./*.sh
+if ! shellcheck maketests
 then
     exit 1
 fi
