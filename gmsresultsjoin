@@ -1,0 +1,59 @@
+#!/usr/bin/env stack
+{- stack script --resolver lts-17.9
+  --package containers --package split --package bifunctors
+-}
+
+{-# LANGUAGE GeneralisedNewtypeDeriving #-}
+
+import qualified Data.Map as Map
+import Data.List.Split
+import Data.List
+import Data.Bifunctor
+import System.Environment
+import System.IO
+
+newtype User = User { unUser :: String } deriving (Eq, Ord)
+newtype Username = Username { unUsername :: String } deriving (Eq, Ord)
+newtype Problem = Problem { unProblem :: String } deriving (Eq, Ord)
+newtype Score = Score { unScore :: Double } deriving (Num, Fractional)
+instance Show Score where show = show . unScore
+
+parseCSV :: String -> (Map.Map User Username, Map.Map (User, Problem) Score)
+parseCSV f = result where
+    header:contents = map (splitOn ",") $ lines f
+    getScores line =
+        [ ((User $ line!!0, Problem $ header!!i), Score $ read $ line!!i)
+        | i <- takeWhile (< (length line - 2)) [2,4..]]
+    scoreList = concatMap getScores contents
+    getUsername line = (User $ line!!0, Username $ line!!1)
+    usernameList = map getUsername contents
+    result =
+        ( Map.fromList usernameList
+        , Map.fromList scoreList
+        )
+
+writeCSV :: (Map.Map User Username, Map.Map (User, Problem) Score) -> String
+writeCSV (u, m) = result where
+    users = nub . sort . map fst . Map.keys $ m
+    problems = nub . sort . map snd . Map.keys $ m
+
+    makeLine user = userUsername ++ map show scores ++ total where
+        userUsername = [unUser user, unUsername $ u Map.! user ]
+        scores = [ Map.findWithDefault 0.0 (user, problem) m | problem <- problems ]
+        total = [ show $ sum scores ]
+
+    resultTable = header : contents where
+        header = [ "User" ] ++ map unProblem problems ++ [ "Total" ]
+        contents = sortOn (negate . (read :: String -> Double) . last) unsortedContents
+        unsortedContents = map makeLine users
+
+    result = unlines $ map (intercalate ",") resultTable
+
+process :: [String] -> String
+process = writeCSV . bimap Map.unions Map.unions . unzip . map parseCSV
+
+main = do
+    filenames <- getArgs
+    handles <- mapM (flip openFile ReadMode) filenames
+    files <- mapM hGetContents handles
+    putStr $ process files
