@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make -s solution
+if ! CFLAGS="-D TESTING -O3" CPPFLAGS="-D TESTING -O3" make -s solution
 then
     echo Need make-able solution.
     exit 1
@@ -21,6 +21,8 @@ then
             headers=("${row[@]}")
         else
             export taskid=$rowid
+            letters=(X {A..Z})
+            groupname=${letters[taskid]}
 
             for i in "${!headers[@]}"
             do
@@ -40,21 +42,23 @@ then
             do
                 echo Making test $testid
 
+                testname="$groupname"_test$testid
+
                 if ! CFLAGS="-D TESTING" CPPFLAGS="-D TESTING" make -s $generator
                 then
                     echo Need make-able generator.
                     exit 1
                 fi
 
-                if ! testid=$testid intaskid=$i ./$generator > test"$testid".in
+                if ! testid=$testid intaskid=$i ./$generator > "$testname".in
                 then
                     echo 'Test generator failed.'
                     exit 1
                 fi
 
-                sed -i'' 's/[[:blank:]]*$//' test"$testid".in
+                sed -i'' 's/[[:blank:]]*$//' "$testname".in
 
-                if ! testid=$testid intaskid=$i ./solution < test"$testid".in > test"$testid".ok
+                if ! testid=$testid intaskid=$i ./solution < "$testname".in > "$testname".ok
                 then
                     echo 'Solution failed.'
                 fi

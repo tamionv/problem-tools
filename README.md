@@ -69,3 +69,7 @@ int main(){
 ## Version 1.5
 
 * Made it so that `maketests` automatically removes trailing whitespace.
+
+## Version 1.6
+
+* Added alphabetic test group identifier to test name. TODO: Add in custom test names.
